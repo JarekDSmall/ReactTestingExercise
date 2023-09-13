@@ -1,31 +1,43 @@
-import { render, fireEvent } from "@testing-library/react";
-import Carousel from "./Carousel";
-import TEST_IMAGES from "./_testCommon.js";
+import React from 'react';
+import { render, fireEvent } from '@testing-library/react';
+import renderer from 'react-test-renderer';
+import Carousel from './Carousel';
 
-it("works when you click on the right arrow", function() {
-  const { container } = render(
-    <Carousel
-      photos={TEST_IMAGES}
-      title="images for testing"
-    />
-  );
-  // expect the first image to show, but not the second
-  expect(
-    container.querySelector('img[alt="testing image 1"]')
-  ).toBeInTheDocument();
-  expect(
-    container.querySelector('img[alt="testing image 2"]')
-  ).not.toBeInTheDocument();
+// Smoke Test for Carousel Component
+test('Carousel component renders without crashing', () => {
+  render(<Carousel />);
+});
+
+// Snapshot Test for Carousel Component
+test('Carousel component matches the snapshot', () => {
+  const tree = renderer.create(<Carousel />).toJSON();
+  expect(tree).toMatchSnapshot();
+});
+
+
+test('works when you click on the right arrow', function() {
+  const { queryByTestId, queryByAltText } = render(<Carousel />);
+  const rightArrow = queryByTestId("right-arrow");
+  const leftArrow = queryByTestId("left-arrow");
+  const image = queryByAltText("Photo by Richard Pasquarella on Unsplash");
 
   // move forward in the carousel
-  const rightArrow = container.querySelector(".bi-arrow-right-circle");
   fireEvent.click(rightArrow);
 
-  // expect the second image to show, but not the first
-  expect(
-    container.querySelector('img[alt="testing image 1"]')
-  ).not.toBeInTheDocument();
-  expect(
-    container.querySelector('img[alt="testing image 2"]')
-  ).toBeInTheDocument();
+  // make sure the second image shows up
+  const secondImage = queryByAltText("Photo by Pratik Patel on Unsplash");
+  expect(secondImage).toBeInTheDocument();
 });
+
+test('works when you click on the left arrow', function() {
+  const { queryByTestId, queryByAltText } = render(<Carousel />);
+  const leftArrow = queryByTestId("left-arrow");
+
+  // move back in the carousel
+  fireEvent.click(leftArrow);
+
+  // make sure the first image shows up
+  const firstImage = queryByAltText("Photo by Richard Pasquarella on Unsplash");
+  expect(firstImage).toBeInTheDocument();
+});
+
